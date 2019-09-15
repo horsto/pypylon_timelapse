@@ -28,6 +28,8 @@ for image_no in range(numberOfImagesToGrab):
     camera.ExposureTime = settings['camera_exposure_time']
     camera.ExposureAuto = settings['camera_exposure_auto'] # Might reset that setting
     camera.BalanceWhiteAuto = settings['camera_balance_white_auto']
+    camera.ReverseY = 'true'
+    camera.ReverseX = 'true'
 
     while camera.IsGrabbing():
         grabResult = camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
