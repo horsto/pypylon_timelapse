@@ -1,34 +1,47 @@
 from pypylon import pylon
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
+import time
+from datetime import datetime
+from dj_schemas import *
 
+# Retrieve settings
+settings = Settings.fetch1() # Only one setting allowed!
+print(settings)
 
 camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
-
-numberOfImagesToGrab = 1
-camera.StartGrabbingMax(numberOfImagesToGrab)
-
-camera.GainAuto = 'Off'
-camera.ExposureAuto = 'Off'
-camera.ExposureTime = 10000
-camera.BalanceWhiteAuto = 'Once'
-
 converter = pylon.ImageFormatConverter()
-# converting to opencv bgr format
 converter.OutputPixelFormat = pylon.PixelType_RGB8packed
-#converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
 
+now = datetime.now()
+print('{} Starting grabbing'.format(now))
 
-print('Starting grabbing')
-while camera.IsGrabbing():
-    grabResult = camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+numberOfImagesToGrab = settings['no_images']
 
-    if grabResult.GrabSucceeded():
-        # Access the image data.
-        image = converter.Convert(grabResult)
-        img = image.GetArray()
-        print(img.shape)
-        plt.imshow(img)
-        plt.show()
-        #print("Gray value of first pixel: ", img[0, 0])
+for image_no in range(numberOfImagesToGrab):
+    camera.StartGrabbingMax(1)
+    camera.GainAuto = settings['camera_gain_auto']
+    camera.ExposureTime = settings['camera_exposure_time']
+    camera.ExposureAuto = settings['camera_exposure_auto'] # Might reset that setting
+    camera.BalanceWhiteAuto = settings['camera_balance_white_auto']
 
-    grabResult.Release()
+    while camera.IsGrabbing():
+        grabResult = camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+
+        if grabResult.GrabSucceeded():
+            print('Processing picture {}/{}'.format(image_no+1,numberOfImagesToGrab))
+            # Access the image data.
+            image = converter.Convert(grabResult)
+            img = image.GetArray()
+
+            # Write to Datajoint
+            TimeLapse.insert1({
+                        'picture':  img,
+                        'mean_r' :  np.mean(img[:, :, 0]),
+                        'mean_g' :  np.mean(img[:, :, 1]),
+                        'mean_b' :  np.mean(img[:, :, 2])
+                        })
+            #print(img.shape)
+        grabResult.Release()
+    if image_no < numberOfImagesToGrab:
+        time.sleep(settings['time_between_images'])

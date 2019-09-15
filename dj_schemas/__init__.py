@@ -20,7 +20,7 @@ dj.config['database.password'] = dj_pass
 
 #### DATABASES ##############################################
 db_prefix = ''
-dj.config['dj_timelapse.database'] = db_prefix + 'group_shared_timelapse1'
+dj.config['dj_timelapse.database'] = db_prefix + 'group_imaging_timelapse1'
 
 #### DRIVES #################################################
 # Load drives connected to this computer
@@ -32,9 +32,12 @@ config.read(drivecfg)
 
 dj.config['drives'] = config['network_drives']
 dj.config['stores'] = {
-    'imgstore': {
+    'timelapsestore': {
         'protocol': 'file',
         # 'location': dj.config['drives']['Datajoint']
         'location': os.path.join(dj.config['drives']['Datajoint'], 'timelapsestore')
     }}
 dj.config['safemode'] = False
+
+
+from .timelapse import *
