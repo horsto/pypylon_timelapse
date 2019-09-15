@@ -1,2 +1,3 @@
 auth.cfg
 network_drives.cfg
+*.pyc
