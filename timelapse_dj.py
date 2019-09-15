@@ -6,7 +6,6 @@ from dj_schemas import *
 
 # Retrieve settings
 settings = Settings.fetch1() # Only one setting allowed!
-print(settings)
 
 camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
 converter = pylon.ImageFormatConverter()
@@ -43,5 +42,5 @@ for image_no in range(numberOfImagesToGrab):
                         })
             #print(img.shape)
         grabResult.Release()
-    if image_no < numberOfImagesToGrab:
+    if image_no < numberOfImagesToGrab-1:
         time.sleep(settings['time_between_images'])
