@@ -1,3 +1,4 @@
+import sys
 from pypylon import pylon
 #from matplotlib import pyplot as plt
 import time
@@ -13,6 +14,10 @@ converter.OutputPixelFormat = pylon.PixelType_RGB8packed
 converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
 
 now = datetime.now()
+if (now.hour < settings['start_hour_morning']) or (now.hour > settings['stop_hour_evening']):
+      print('Time outside the set range')
+      sys.exit()
+
 print('{} Starting grabbing'.format(now))
 
 numberOfImagesToGrab = settings['no_images']
