@@ -1,4 +1,7 @@
 import datajoint as dj
+import cv2
+from skimage.measure import compare_ssim
+
 schema = dj.schema(dj.config['dj_timelapse.database'])
 
 import numpy as np
@@ -35,3 +38,38 @@ class TimeLapse(dj.Manual):
     mean_b          :  float
     picture = NULL  :  blob@timelapsestore
     """
+
+
+@schema
+class Similarity(dj.Computed):
+    definition = """
+    # Similarity metrics calculated between adjacent timelapse images
+    -> TimeLapse
+    ---
+    entry_time_picture_prev : datetime # Entry time of previous timelapse entry
+    mse                     : float    # Mean squared error
+    ssim                    : float    # Structural similarity
+    """
+    def mse(self, imageA, imageB):
+        ''' https://www.pyimagesearch.com/2014/09/15/python-compare-two-images '''
+        # the 'Mean Squared Error' between the two images is the
+        # sum of the squared difference between the two images;
+        err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
+        err /= float(imageA.shape[0] * imageA.shape[1])
+        # return the MSE, the lower the error, the more "similar"
+        # the two images are
+        return err
+
+    def make(self, key):
+        timelapse_entry = (TimeLapse & key).fetch1()
+
+        last_pic_entry = (TimeLapse & 'entry_time_picture < "{}"'.format(timelapse_entry['entry_time_picture']))\
+                     .fetch(order_by='entry_time_picture DESC', limit=1, as_dict=True)[0]
+        key['entry_time_picture_prev'] = last_pic_entry['entry_time_picture']
+        picture = cv2.cvtColor(timelapse_entry['picture'], cv2.COLOR_BGR2GRAY)
+        picture_prev = cv2.cvtColor(last_pic_entry['picture'], cv2.COLOR_BGR2GRAY)
+
+        key['mse']  = self.mse(picture,picture_prev)
+        key['ssim'] = compare_ssim(picture,picture_prev)
+        self.insert1(key)
+
