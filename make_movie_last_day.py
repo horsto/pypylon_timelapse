@@ -6,12 +6,13 @@ import imageio
 from PIL import Image, ImageFont, ImageDraw
 
 similarity_threshold = .93
+mse_threshold = 7000
 output_basefolder = '/mnt/N/horsto/timelapses'
 
 if __name__ == "__main__":
     print('############ Make movie ############')
     # Collect output from the last day
-    restrictor = (timelapse.TimeLapse * timelapse.Similarity & 'ssim < {}'.format(similarity_threshold) \
+    restrictor = (timelapse.TimeLapse * timelapse.Similarity & 'ssim < {}'.format(similarity_threshold) & 'mse < {}'.format(mse_threshold)\
                   & 'entry_time_picture > "{}"'.format(datetime.today() - timedelta(days=1)))
     print('Found {} images. Making movie ... '.format(len(restrictor)))
     yesterday = datetime.strftime(datetime.today() - timedelta(days=1),'%d_%m_%Y') # For movie filename
