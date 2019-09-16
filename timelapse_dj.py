@@ -14,7 +14,7 @@ converter.OutputPixelFormat = pylon.PixelType_RGB8packed
 converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
 
 now = datetime.now()
-if (now.hour < settings['start_hour_morning']) or (now.hour > settings['stop_hour_evening']):
+if (now.hour < settings['start_hour_morning']) or (now.hour >= settings['stop_hour_evening']):
       print('Time outside the set range')
       sys.exit()
 
