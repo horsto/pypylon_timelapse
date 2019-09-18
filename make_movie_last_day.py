@@ -6,8 +6,8 @@ import imageio
 from PIL import Image, ImageFont, ImageDraw
 from tqdm import tqdm
 
-similarity_threshold = .93
-mse_threshold = 7000
+similarity_threshold = .91
+mse_threshold = 5000
 output_basefolder = '/mnt/N/horsto/timelapses'
 
 if __name__ == "__main__":
