@@ -4,6 +4,7 @@ from datetime import datetime,timedelta
 from dj_schemas import *
 import imageio
 from PIL import Image, ImageFont, ImageDraw
+from tqdm import tqdm
 
 similarity_threshold = .93
 mse_threshold = 7000
@@ -19,7 +20,7 @@ if __name__ == "__main__":
 
     # Write mp4 file
     with imageio.get_writer('{}/{}.mp4'.format(output_basefolder, yesterday), fps=15) as writer:
-        for pic in restrictor:
+        for pic in tqdm(restrictor):
             img = Image.fromarray(pic['picture']) # Transform into PIL object
             draw = ImageDraw.Draw(img)
             font = ImageFont.truetype('Fernando.otf', 115)
